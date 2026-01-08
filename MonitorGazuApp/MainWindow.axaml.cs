@@ -19,13 +19,16 @@ namespace MonitorGazuApp;
 
 public partial class MainWindow : Window
 {
-    private ObservableCollection<PomiarGazu> _historia;
+    private readonly Dictionary<string, ObservableCollection<PomiarGazu>> _historiaPerSensor = new();
+    private string _wybranySensorId = "S1";
+    private TextBlock _lblTytulStezenia;
     private IMqttClient _mqttClient;
     private bool _demoDziala = false;
 
     // Lista sensorów i mapa podpisów
     private List<Ellipse> _wszystkieSensory = new List<Ellipse>();
     private Dictionary<Control, Control> _mapaPodpisow = new Dictionary<Control, Control>();
+    private Dictionary<Control, string> _mapaSensorId = new Dictionary<Control, string>();
 
     // Referencje do głównego sensora S1
     private Ellipse _mainDot;
@@ -34,22 +37,27 @@ public partial class MainWindow : Window
     // --- ZMIENNE DO DRAG & DROP ---
     private bool _jestPrzeciagany = false;
     private Control _przeciaganyObiekt = null;
-    private Point _punktZaczepienia; // Tutaj był błąd, teraz dzięki "using Avalonia;" zadziała
+    private Point _punktZaczepienia;
 
     public MainWindow()
     {
         InitializeComponent();
 
-        _historia = new ObservableCollection<PomiarGazu>();
-        this.FindControl<ListBox>("ListaHistorii").ItemsSource = _historia;
+        _historiaPerSensor["S1"] = new ObservableCollection<PomiarGazu>();
+        this.FindControl<ListBox>("ListaHistorii").ItemsSource = _historiaPerSensor["S1"];
+
+        _lblTytulStezenia = this.FindControl<TextBlock>("LblTytulStezenia");
 
         // Pobieramy S1
         _mainDot = this.FindControl<Ellipse>("CzujnikGlowny");
         _mainLabel = this.FindControl<TextBlock>("EtykietaGlowna");
 
+        _mainDot.Tag = "S1";
+
         // Rejestrujemy S1 w systemie
         _wszystkieSensory.Add(_mainDot);
         _mapaPodpisow.Add(_mainDot, _mainLabel);
+        _mapaSensorId[_mainDot] = "S1";
         WlaczPrzeciaganie(_mainDot); // Włączamy przesuwanie dla S1
 
         // --- PRZYCISKI ---
@@ -75,6 +83,67 @@ public partial class MainWindow : Window
         canvas.DoubleTapped += DodajSensorDwuklikiem;
     }
 
+    private string GetSensorId(Control sensor)
+    {
+        if (_mapaSensorId.TryGetValue(sensor, out var id)) return id;
+        if (sensor.Tag is string tag && !string.IsNullOrWhiteSpace(tag)) return tag;
+        return "S?";
+    }
+
+    private ObservableCollection<PomiarGazu> GetHistoriaSensora(string sensorId)
+    {
+        if (!_historiaPerSensor.TryGetValue(sensorId, out var historia))
+        {
+            historia = new ObservableCollection<PomiarGazu>();
+            _historiaPerSensor[sensorId] = historia;
+        }
+        return historia;
+    }
+
+    private void UstawWybranySensor(Control sensor)
+    {
+        var id = GetSensorId(sensor);
+        _wybranySensorId = id;
+        this.FindControl<ListBox>("ListaHistorii").ItemsSource = GetHistoriaSensora(id);
+
+        if (_lblTytulStezenia != null)
+            _lblTytulStezenia.Text = $"Aktualne Stężenie ({id}):";
+
+        var historia = GetHistoriaSensora(id);
+        if (historia.Count > 0) UstawPanelPomiaru(historia[0].WartoscPpm);
+        else UstawPanelPomiaru(null);
+    }
+
+    private void UstawPanelPomiaru(double? wartosc)
+    {
+        var lblWynik = this.FindControl<TextBlock>("LblWynik");
+        var lblStatus = this.FindControl<TextBlock>("LblStatus");
+        var bar = this.FindControl<ProgressBar>("PasekGazu");
+
+        if (wartosc is null)
+        {
+            lblWynik.Text = "---";
+            lblWynik.Foreground = Brushes.Gray;
+            lblStatus.Text = "Brak danych";
+            lblStatus.Foreground = Brushes.Gray;
+            bar.Value = 0;
+            bar.Foreground = Brushes.Gray;
+            return;
+        }
+
+        IBrush kolor = Brushes.LimeGreen;
+        string opis = "W Normie";
+        if (wartosc > 150) { kolor = Brushes.Red; opis = "⚠️ ALARM GAZOWY!"; }
+        else if (wartosc > 80) { kolor = Brushes.Orange; opis = "Ostrzeżenie"; }
+
+        lblWynik.Text = wartosc.Value.ToString("0.0");
+        lblWynik.Foreground = kolor;
+        lblStatus.Text = opis;
+        lblStatus.Foreground = kolor;
+        bar.Value = wartosc.Value;
+        bar.Foreground = kolor;
+    }
+
 
     private void WlaczPrzeciaganie(Control element)
     {
@@ -89,6 +158,7 @@ public partial class MainWindow : Window
         var element = (Control)sender;
         if (e.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
         {
+            UstawWybranySensor(element);
             _jestPrzeciagany = true;
             _przeciaganyObiekt = element;
             _punktZaczepienia = e.GetPosition(element);
@@ -121,7 +191,7 @@ public partial class MainWindow : Window
         if (_mapaPodpisow.TryGetValue(_przeciaganyObiekt, out var etykieta))
         {
             Canvas.SetLeft(etykieta, noweX + 5);
-            Canvas.SetTop(etykieta, noweY + 35);
+            Canvas.SetTop(etykieta, noweY + 25);
         }
 
         // Aktualizacja pól tekstowych dla S1
@@ -158,9 +228,11 @@ public partial class MainWindow : Window
         Canvas.SetLeft(kropka, p.X - 10);
         Canvas.SetTop(kropka, p.Y - 10);
 
+        var sensorId = $"S{_wszystkieSensory.Count + 1}";
+
         var podpis = new TextBlock
         {
-            Text = $"S{_wszystkieSensory.Count + 1}",
+            Text = sensorId,
             Foreground = Brushes.LightGray,
             FontSize = 10,
             FontWeight = FontWeight.Bold,
@@ -172,8 +244,10 @@ public partial class MainWindow : Window
         canvas.Children.Add(kropka);
         canvas.Children.Add(podpis);
 
+        kropka.Tag = sensorId;
         _wszystkieSensory.Add(kropka);
         _mapaPodpisow.Add(kropka, podpis);
+        _mapaSensorId[kropka] = sensorId;
         WlaczPrzeciaganie(kropka);
     }
 
@@ -181,7 +255,7 @@ public partial class MainWindow : Window
     private void PrzesunWizualnieS1(double x, double y)
     {
         Canvas.SetLeft(_mainDot, x); Canvas.SetTop(_mainDot, y);
-        Canvas.SetLeft(_mainLabel, x + 5); Canvas.SetTop(_mainLabel, y + 35);
+        Canvas.SetLeft(_mainLabel, x + 5); Canvas.SetTop(_mainLabel, y + 25);
     }
 
     private void PokazOknoPolaczenia(object sender, RoutedEventArgs e)
@@ -201,31 +275,26 @@ public partial class MainWindow : Window
     {
         Dispatcher.UIThread.InvokeAsync(() =>
         {
-            var lblWynik = this.FindControl<TextBlock>("LblWynik");
-            var lblStatus = this.FindControl<TextBlock>("LblStatus");
-            var bar = this.FindControl<ProgressBar>("PasekGazu");
+            // Panel pomiarowy odświeżamy tylko, jeśli użytkownik ogląda S1
+            if (_wybranySensorId == "S1")
+                UstawPanelPomiaru(wartosc);
 
+            // S1 zawsze aktualizuje swój wygląd
             IBrush kolor = Brushes.LimeGreen;
-            string opis = "W Normie";
-            if (wartosc > 150) { kolor = Brushes.Red; opis = "⚠️ ALARM GAZOWY!"; }
-            else if (wartosc > 80) { kolor = Brushes.Orange; opis = "Ostrzeżenie"; }
-
-            lblWynik.Text = wartosc.ToString("0.0");
-            lblWynik.Foreground = kolor;
-            lblStatus.Text = opis;
-            bar.Value = wartosc;
-            bar.Foreground = kolor;
+            if (wartosc > 150) kolor = Brushes.Red;
+            else if (wartosc > 80) kolor = Brushes.Orange;
 
             _mainDot.Fill = kolor;
-            if (wartosc > 150) { _mainDot.Width = 35; _mainDot.Height = 35; }
-            else { _mainDot.Width = 30; _mainDot.Height = 30; }
+            _mainDot.Width = 20;
+            _mainDot.Height = 20;
 
             double x = Canvas.GetLeft(_mainDot);
             double y = Canvas.GetTop(_mainDot);
-            var pomiar = new PomiarGazu(wartosc, x, y);
 
-            _historia.Insert(0, pomiar);
-            if (_historia.Count > 100) _historia.RemoveAt(99);
+            var pomiar = new PomiarGazu(wartosc, x, y, "S1");
+            var historiaS1 = GetHistoriaSensora("S1");
+            historiaS1.Insert(0, pomiar);
+            if (historiaS1.Count > 100) historiaS1.RemoveAt(99);
         });
     }
 
@@ -251,6 +320,23 @@ public partial class MainWindow : Window
                         if (s == _mainDot) continue;
                         int r = rnd.Next(0, 5);
                         s.Fill = r == 0 ? Brushes.Red : (r == 1 ? Brushes.Orange : Brushes.Gray);
+
+                        // Dodajemy pomiar do historii danego sensora (żeby klik w S2/S3 coś pokazywał)
+                        var id = GetSensorId(s);
+                        var x = Canvas.GetLeft(s);
+                        var y = Canvas.GetTop(s);
+                        double ppm = r == 0
+                            ? rnd.Next(160, 251)              // czerwony
+                            : (r == 1 ? rnd.Next(90, 151)     // pomarańczowy
+                                     : rnd.Next(20, 81));     // szary
+
+                        var pomiar = new PomiarGazu(ppm, x, y, id);
+                        var historia = GetHistoriaSensora(id);
+                        historia.Insert(0, pomiar);
+                        if (historia.Count > 100) historia.RemoveAt(99);
+
+                        if (_wybranySensorId == id)
+                            UstawPanelPomiaru(ppm);
                     }
                 });
                 await Task.Delay(500);

@@ -14,7 +14,7 @@
 
                     <Border Background="#F9F9F9" CornerRadius="12" Padding="20">
                         <StackPanel>
-                            <TextBlock Text="Aktualne Stężenie (S1):" Foreground="Gray" HorizontalAlignment="Center"/>
+                            <TextBlock Name="LblTytulStezenia" Text="Aktualne Stężenie (S1):" Foreground="Gray" HorizontalAlignment="Center"/>
                             <TextBlock Name="LblWynik" Text="---" FontSize="64" FontWeight="Bold" 
                                        Foreground="#FFA500" HorizontalAlignment="Center"/>
                             <TextBlock Name="LblStatus" Text="Oczekiwanie..." FontSize="18" 
@@ -42,7 +42,7 @@
                             Background="#007ACC" Foreground="White" Padding="12" FontSize="16" FontWeight="Bold"/>
                     
                     <Grid ColumnDefinitions="*,*">
-                        <Button Name="BtnSymulacja" Grid.Column="0" Content="▶ START Demo" 
+                        <Button Name="BtnSymulacja" Grid.Column="0" Content="▶ START" 
                                 Background="#28a745" Foreground="White" HorizontalContentAlignment="Center" Margin="0,0,8,0"/>
                         <Button Name="BtnStop" Grid.Column="1" Content="⏹ STOP" 
                                 Background="#dc3545" Foreground="White" HorizontalContentAlignment="Center"/>
@@ -72,9 +72,9 @@
                     <TextBlock Text="SERWEROWNIA" Canvas.Left="70" Canvas.Top="80" Foreground="#555" FontSize="12" FontWeight="Bold"/>
                     <Rectangle Canvas.Left="60" Canvas.Top="60" Width="120" Height="80" Stroke="#444" StrokeDashArray="2,2"/>
 
-                    <Ellipse Name="CzujnikGlowny" Width="30" Height="30" Fill="Orange" Stroke="White" StrokeThickness="3"
+                    <Ellipse Name="CzujnikGlowny" Width="20" Height="20" Fill="Orange" Stroke="White" StrokeThickness="3"
                              Canvas.Left="250" Canvas.Top="200"/>
-                    <TextBlock Name="EtykietaGlowna" Text="S1" Foreground="White" FontWeight="Bold" Canvas.Left="255" Canvas.Top="235"/>
+                    <TextBlock Name="EtykietaGlowna" Text="S1" Foreground="White"  Canvas.Left="255" Canvas.Top="225"/>
                 </Canvas>
             </Border>
         </Grid>
