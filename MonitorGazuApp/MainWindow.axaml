@@ -8,53 +8,83 @@
         <Grid ColumnDefinitions="360, *">
             
             <Border Grid.Column="0" Background="White" Margin="15" CornerRadius="15" BoxShadow="0 4 15 0 #CCC">
-                <StackPanel Margin="25" Spacing="20">
+                <StackPanel Margin="18" Spacing="10">
                     <TextBlock Text="PANEL OPERATORA" FontWeight="Bold" FontSize="22" 
                                HorizontalAlignment="Center" Foreground="#333"/>
 
-                    <Border Background="#F9F9F9" CornerRadius="12" Padding="20">
+                    <Border Background="#F9F9F9" CornerRadius="12" Padding="12" BoxShadow="0 2 8 0 #E0E0E0">
                         <StackPanel>
-                            <TextBlock Name="LblTytulStezenia" Text="Aktualne Stężenie (S1):" Foreground="Gray" HorizontalAlignment="Center"/>
-                            <TextBlock Name="LblWynik" Text="---" FontSize="64" FontWeight="Bold" 
-                                       Foreground="#FFA500" HorizontalAlignment="Center"/>
-                            <TextBlock Name="LblStatus" Text="Oczekiwanie..." FontSize="18" 
+                            <TextBlock Name="LblTytulStezenia" Text="Aktualne Stężenie (S1):" Foreground="#666" 
+                                       HorizontalAlignment="Center" FontSize="12" FontWeight="SemiBold"/>
+                            <TextBlock Name="LblWynik" Text="---" FontSize="48" FontWeight="Bold" 
+                                       Foreground="#FFA500" HorizontalAlignment="Center" Margin="0,2"/>
+                            <TextBlock Name="LblStatus" Text="Oczekiwanie..." FontSize="15" 
                                        Foreground="#555" FontWeight="SemiBold" HorizontalAlignment="Center"/>
                         </StackPanel>
                     </Border>
                     
                     <ProgressBar Name="PasekGazu" Minimum="0" Maximum="250" Height="20" 
-                                 Foreground="#007ACC" Background="#E0E0E0" CornerRadius="10"/>
+                                 Foreground="#007ACC" Background="#E8E8E8" CornerRadius="10" 
+                                 BorderBrush="#CCC" BorderThickness="1"/>
 
-                    <Border Background="#F0F0F0" Padding="15" CornerRadius="8">
+                    <Border Background="#F5F5F5" Padding="10" CornerRadius="10" BorderBrush="#DDD" BorderThickness="1">
                         <StackPanel>
-                            <TextBlock Text="Wybrany Sensor (X, Y):" FontWeight="Bold" FontSize="12" Margin="0,0,0,8"/>
-                            <Grid ColumnDefinitions="*,*,Auto">
-                                <TextBox Name="TxtX" Grid.Column="0" Watermark="X" Margin="0,0,5,0"/>
-                                <TextBox Name="TxtY" Grid.Column="1" Watermark="Y" Margin="0,0,5,0"/>
-                                <Button Name="BtnUstaw" Grid.Column="2" Content="Przesuń" Background="#6C757D" Foreground="White"/>
+                            <TextBlock Text="📍 Wybrany Sensor (X, Y):" FontWeight="Bold" FontSize="11" Margin="0,0,0,6" Foreground="#333"/>
+                            <Grid ColumnDefinitions="*,*,Auto" ColumnSpacing="5">
+                                <TextBox Name="TxtX" Grid.Column="0" Watermark="X" CornerRadius="6" 
+                                         Background="White" BorderBrush="#CCC" Padding="5"
+                                         Foreground="#222" FontSize="13" FontWeight="SemiBold"/>
+                                <TextBox Name="TxtY" Grid.Column="1" Watermark="Y" CornerRadius="6" 
+                                         Background="White" BorderBrush="#CCC" Padding="5"
+                                         Foreground="#222" FontSize="13" FontWeight="SemiBold"/>
+                                <Button Name="BtnUstaw" Grid.Column="2" Content="Przesuń" 
+                                        Background="#6C757D" Foreground="White" CornerRadius="6" 
+                                        Padding="8,5" FontWeight="SemiBold" FontSize="11"/>
                             </Grid>
-                            <TextBlock Text="ℹ️ Dwuklik = Dodaj | Przytrzymaj = Przesuń" FontSize="11" Foreground="#007ACC" Margin="0,5,0,0" FontStyle="Italic"/>
+                            <TextBlock Text="ℹ️ Dwuklik = Dodaj | Przytrzymaj = Przesuń" 
+                                       FontSize="9" Foreground="#007ACC" Margin="0,5,0,0" FontStyle="Italic"/>
                         </StackPanel>
                     </Border>
 
-                    <Button Name="BtnOtworzPolaczenie" Content="📡 Znajdź urządzenia IoT" 
+                    <Button Name="BtnOtworzPolaczenie" Content="📡 Połącz IoT" 
                             HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" 
-                            Background="#007ACC" Foreground="White" Padding="12" FontSize="16" FontWeight="Bold"/>
+                            Background="#007ACC" Foreground="White" Padding="12" FontSize="15" 
+                            FontWeight="Bold" CornerRadius="8" Height="45"/>
                     
-                    <Grid ColumnDefinitions="*,*">
+                    <Button Name="BtnRozlaczIoT" Content="🔌 Rozłącz IoT" 
+                            HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" 
+                            Background="#DC3545" Foreground="White" Padding="10" FontSize="14" 
+                            FontWeight="SemiBold" CornerRadius="8" Height="40" IsVisible="False"/>
+                    
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
                         <Button Name="BtnSymulacja" Grid.Column="0" Content="▶ START" 
-                                Background="#28a745" Foreground="White" HorizontalContentAlignment="Center" Margin="0,0,8,0"/>
+                                Background="#28a745" Foreground="White" HorizontalContentAlignment="Center" 
+                                CornerRadius="8" Padding="10" FontWeight="Bold" FontSize="14"/>
                         <Button Name="BtnStop" Grid.Column="1" Content="⏹ STOP" 
-                                Background="#dc3545" Foreground="White" HorizontalContentAlignment="Center"/>
+                                Background="#dc3545" Foreground="White" HorizontalContentAlignment="Center" 
+                                CornerRadius="8" Padding="10" FontWeight="Bold" FontSize="14"/>
                     </Grid>
 
-                    <TextBlock Text="Dziennik zdarzeń:" FontSize="14" FontWeight="Bold" Margin="0,10,0,0"/>
-                    <Border BorderBrush="#BBB" BorderThickness="1" CornerRadius="5" Background="#FAFAFA" Height="100">
-                        <ListBox Name="ListaHistorii" Background="Transparent">
+                    <TextBlock Text="📋 Dziennik zdarzeń:" FontSize="14" FontWeight="Bold" Margin="0,3,0,0" Foreground="#333"/>
+                    <Border BorderBrush="#007ACC" BorderThickness="2" CornerRadius="12" Background="White" Height="110" 
+                            BoxShadow="0 2 8 0 #DDD" Padding="5">
+                        <ListBox Name="ListaHistorii" Background="Transparent" BorderThickness="0">
                             <ListBox.Styles>
                                 <Style Selector="ListBoxItem">
-                                    <Setter Property="FontSize" Value="12"/>
-                                    <Setter Property="Foreground" Value="Black"/> <Setter Property="Padding" Value="5"/>
+                                    <Setter Property="FontSize" Value="11"/>
+                                    <Setter Property="Foreground" Value="#222"/>
+                                    <Setter Property="Padding" Value="5,3"/>
+                                    <Setter Property="Margin" Value="0,1"/>
+                                    <Setter Property="CornerRadius" Value="4"/>
+                                </Style>
+                                <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter">
+                                    <Setter Property="Background" Value="#F0F8FF"/>
+                                </Style>
+                                <Style Selector="ListBoxItem:selected /template/ ContentPresenter">
+                                    <Setter Property="Background" Value="#007ACC"/>
+                                </Style>
+                                <Style Selector="ListBoxItem:selected">
+                                    <Setter Property="Foreground" Value="White"/>
                                 </Style>
                             </ListBox.Styles>
                         </ListBox>
@@ -76,45 +106,6 @@
                              Canvas.Left="250" Canvas.Top="200"/>
                     <TextBlock Name="EtykietaGlowna" Text="S1" Foreground="White"  Canvas.Left="255" Canvas.Top="225"/>
                 </Canvas>
-            </Border>
-        </Grid>
-
-        <Grid Name="Overlay" IsVisible="False" Background="#99000000">
-            <Border Width="450" Height="380" Background="White" CornerRadius="20" BoxShadow="0 10 40 5 Black">
-                <StackPanel Margin="30" Spacing="15" VerticalAlignment="Center">
-                    <TextBlock Text="Wybierz urządzenie IoT" FontSize="24" FontWeight="Bold" HorizontalAlignment="Center" Foreground="Black"/>
-                    <TextBlock Text="Wykryte czujniki w sieci WiFi/MQTT:" Foreground="Gray" HorizontalAlignment="Center" Margin="0,0,0,10"/>
-                    
-                    <ListBox Name="ListaUrzadzen" Height="140" Background="#F2F2F2" CornerRadius="8">
-                        <ListBox.Styles>
-                            <Style Selector="ListBoxItem">
-                                <Setter Property="Foreground" Value="Black"/> 
-                                <Setter Property="FontSize" Value="14"/>
-                                <Setter Property="Padding" Value="10"/>
-                                <Setter Property="Margin" Value="0,2"/>
-                            </Style>
-                            
-                            <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter">
-                                <Setter Property="Background" Value="#E0E0E0"/>
-                            </Style>
-
-                            <Style Selector="ListBoxItem:selected /template/ ContentPresenter">
-                                <Setter Property="Background" Value="#007ACC"/>
-                                <Setter Property="Foreground" Value="White"/>
-                            </Style>
-                            <Style Selector="ListBoxItem:selected">
-                                <Setter Property="Foreground" Value="White"/>
-                            </Style>
-                        </ListBox.Styles>
-                    </ListBox>
-
-                    <Button Name="BtnPotwierdzPolacz" Content="POŁĄCZ TERAZ" 
-                            Background="#007ACC" Foreground="White" HorizontalAlignment="Stretch" 
-                            HorizontalContentAlignment="Center" Padding="15" FontWeight="Bold" Margin="0,15,0,0" CornerRadius="8"/>
-                    
-                    <Button Name="BtnAnuluj" Content="Anuluj" Background="Transparent" Foreground="Gray" 
-                            HorizontalAlignment="Center" Cursor="Hand"/>
-                </StackPanel>
             </Border>
         </Grid>
     </Grid>
